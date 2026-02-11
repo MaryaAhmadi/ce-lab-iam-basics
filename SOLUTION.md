@@ -1,7 +1,7 @@
 # IAM Basics Lab - Solution
 
-**Student Name:** [Your Name]  
-**Date Completed:** [Date]
+**Student Name:** Maryam Ahmadi 
+**Date Completed:** 11.02.2026
 
 ---
 
@@ -11,8 +11,13 @@
 ![Groups Created](screenshots/groups-created.png)
 
 ### Groups Created:
-- [x] Developers group
-- [x] DevOps group
+-  ✅ Developers group
+-  ✅DevOps group
+
+
+Explanation:
+
+Groups were created to manage permissions at scale and avoid attaching policies directly to individual users. This follows IAM best practices.
 
 ---
 
@@ -47,6 +52,17 @@
 | bob | Developers | Yes | ✅ Created |
 | charlie | DevOps | Yes | ✅ Created |
 
+
+
+Notes:
+
+All users were required to change password at first login.
+
+Credentials were saved securely and not committed to GitHub.
+
+credentials.txt was added to .gitignore.
+
+
 ---
 
 ## Exercise 4: Permission Testing
@@ -63,6 +79,9 @@
 - View instances: ✅ SUCCESS
 - Launch instance: ❌ DENIED (Expected)
 
+Alice correctly has read-only EC2 permissions.
+
+
 ### Bob's Access Tests:
 
 **S3 Access:**
@@ -74,12 +93,18 @@
 - View instances: ✅ SUCCESS
 - Launch instance: ❌ DENIED (Expected)
 
+Bob had the same permissions as Developers group before applying the custom policy.
+
+
 ### Charlie's Access Tests:
 
 **Full Access:**
 ![Charlie Full Access](screenshots/charlie-full-access.png)
 - S3 create bucket: ✅ SUCCESS
 - EC2 launch instance: ✅ SUCCESS
+
+Charlie (DevOps) has full EC2 and S3 access as expected.
+
 
 ### Summary of Test Results:
 
@@ -88,6 +113,8 @@
 | alice | ✅ | ✅ | ❌ | As expected |
 | bob | ✅ | ✅ | ❌ | As expected |
 | charlie | ✅ | ✅ | ✅ | As expected |
+
+Access control worked correctly according to assigned group policies.
 
 ---
 
@@ -124,12 +151,25 @@
 }
 ```
 
+
+Changes Applied:
+
+Removed AmazonS3FullAccess from Bob
+
+Attached DevBucketAccessPolicy directly to Bob
+
+
+
+
+
 ### Custom Policy Test:
 ![Bob Custom Policy Test](screenshots/bob-custom-policy-test.png)
 
 **Bob's Access After Custom Policy:**
 - Access dev-bucket: ✅ SUCCESS
 - Access other buckets: ❌ DENIED (Expected)
+
+This successfully enforced the principle of least privilege.
 
 ---
 
@@ -143,6 +183,10 @@
 - Authenticator app: [Google Authenticator / Microsoft Authenticator / Authy]
 - Status: ✅ Active
 
+
+MFA was successfully configured and tested by logging out and logging back in.
+
+
 ---
 
 ## Bonus Challenges
@@ -152,12 +196,14 @@
 ![Password Policy](screenshots/password-policy.png)
 
 **Policy Settings:**
-- [x] Minimum length: 12 characters
-- [x] Require uppercase letters
-- [x] Require lowercase letters
-- [x] Require numbers
-- [x] Require symbols
-- [x] Password expiration: 90 days
+- ✅ Minimum length: 12 characters
+- ✅ Require uppercase letters
+- ✅ Require lowercase letters
+- ✅ Require numbers
+- ✅ Require symbols
+- ✅ Password expiration: 90 days
+
+This improves overall account security.
 
 ---
 
@@ -166,20 +212,27 @@
 ![Access Analyzer](screenshots/access-analyzer.png)
 
 **Findings:**
-- Number of findings: [X]
-- Critical issues: [List any public access found]
-- Recommendations: [Your notes]
+
+- Number of findings: 0
+
+- No public or cross-account access detected
+
+- No critical security risks identified
+
+Access Analyzer confirmed that no unintended public access exists
 
 ---
 
 ### Challenge 3: CLI Access Keys
 
-**Alice Access Key Created:** [Yes / No]
+**Alice Access Key Created:** Yes
 
 **CLI Test Output:**
 ```bash
 $ aws s3 ls --profile alice
-[Paste output here]
+2026-02-10  dev-bucket
+
+The CLI configuration was successful and validated using aws s3 ls.
 ```
 
 **Screenshot:** [If applicable]
@@ -192,15 +245,27 @@ $ aws s3 ls --profile alice
 
 **Your Answer:**
 
-[Explain benefits: easier management, consistency, scalability, etc.]
-
+Using groups simplifies permission management. Instead of managing policies individually per user, permissions are assigned once to the group. This improves scalability, reduces configuration errors, and ensures consistency across team members. It also makes onboarding and offboarding easier.
 ---
 
 ### 2. What are the risks of giving everyone AdministratorAccess?
 
 **Your Answer:**
 
-[Discuss: security risks, accidental changes, compliance issues, etc.]
+Granting AdministratorAccess to all users creates serious security risks:
+
+Accidental deletion of resources
+
+Security misconfigurations
+
+Increased blast radius if credentials are compromised
+
+Compliance violations
+
+No enforcement of least privilege
+
+It removes accountability and increases operational risk.
+
 
 ---
 
@@ -208,7 +273,19 @@ $ aws s3 ls --profile alice
 
 **Your Answer:**
 
-[Propose structure: project-based groups, role-based access, tagging strategy, etc.]
+I would use a combination of:
+
+Project-based groups (ProjectA-Developers, ProjectB-Developers)
+
+Role-based access (ReadOnly, Developer, DevOps, Admin)
+
+IAM roles instead of long-term credentials
+
+Resource tagging to enforce project boundaries
+
+Separate AWS accounts per project (recommended best practice)
+
+This structure ensures scalability, isolation, and security
 
 ---
 
@@ -216,7 +293,10 @@ $ aws s3 ls --profile alice
 
 **Your Answer:**
 
-[Explain: user deletion is permanent, permissions can be recreated but history lost, etc.]
+Deleting an IAM user is permanent. The user and their credentials cannot be recovered.
+However, if permissions were assigned via groups, recreating the user and re-adding them to the group restores their access quickly.
+
+CloudTrail logs remain available for auditing past actions.
 
 ---
 
@@ -224,36 +304,46 @@ $ aws s3 ls --profile alice
 
 **What was most challenging about this lab?**
 
-[Your reflection]
+Designing and testing the custom S3 policy to ensure Bob could only access a single bucket while still being able to list buckets.
 
 ---
 
 **What IAM best practice will you always follow?**
 
-[Your reflection]
+Apply the principle of least privilege and avoid using AdministratorAccess unless absolutely necessary.
 
 ---
 
 **How does IAM help implement the principle of least privilege?**
 
-[Your reflection]
+IAM allows granular control over:
+
+Specific services
+
+Specific actions
+
+Specific resources
+
+Conditional access (IP, MFA, time, etc.)
+
+This ensures users only have the minimum permissions required to perform their tasks, reducing security risk.
 
 ---
 
 ## Checklist
 
-- [ ] All 3 users created (alice, bob, charlie)
-- [ ] Both groups created (Developers, DevOps)
-- [ ] Permissions tested for each user
-- [ ] Custom policy created and tested
-- [ ] MFA enabled for at least one user
-- [ ] All screenshots captured
-- [ ] All reflection questions answered
-- [ ] Policy JSON file saved
-- [ ] Work committed to Git
-- [ ] Pull request created
+- ✅ All 3 users created (alice, bob, charlie)
+- ✅ Both groups created (Developers, DevOps)
+- ✅ Permissions tested for each user
+- ✅ Custom policy created and tested
+- ✅ MFA enabled for at least one user
+- ✅ All screenshots captured
+- ✅ All reflection questions answered
+- ✅ Policy JSON file saved
+- ✅ Work committed to Git
+- ✅ Pull request created
 
 ---
 
-**Completed By:** [Your Name]  
-**Date:** [Date]
+**Completed By:** Maryam Ahmadi
+**Date:** 11.2.2026
